@@ -2,18 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width">
     <title>Comic Viewer</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-    <div class="parallax"></div>
-    <div class="comic-container">
-        <img src="panel1.png" alt="Panel 1" class="comic-panel">
-        <img src="panel2.png" alt="Panel 2" class="comic-panel">
-        <img src="panel3.png" alt="Panel 3" class="comic-panel">
-        <!-- Add more panels as needed -->
+  <div class="parallax">
+    <div class="parallax__layer parallax__layer--back">
+      <div class="background">
+          <img src="tree.jpg"> 
+      </div>
+
     </div>
+    <div class="parallax__layer parallax__layer--base">
+        <div class="comic-container">
+          <img src="panel1.png" alt="Panel 1" class="comic-panel"> 
+          <img src="panel2.png" alt="Panel 2" class="comic-panel"> 
+          <img src="panel3.png" alt="Panel 3" class="comic-panel"> 
+        </div>
+    </div>
+  </div>
+
 </body>
 </html>
-
