@@ -12,7 +12,7 @@ body, html {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('background.jpg'); /* Replace with your background image */
+    background-image: url('tree.jpg'); /* Replace with your background image */
     background-attachment: fixed;
     background-size: cover;
     background-position: center;
@@ -20,22 +20,24 @@ body, html {
 }
 
 .comic-container {
-    width: 80%;
-    margin: 0 auto;
+    width: 100%; /* Full width to center content using flexbox */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding-top: 50px;
     padding-bottom: 50px;
 }
 
 .comic-panel {
-    display: block;
-    width: 100%;
+    width: 50%; /* Adjust the width of the comic panels */
+    max-width: 600px; /* Maximum width for larger screens */
     margin-bottom: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 @media (max-width: 768px) {
-    .comic-container {
-        width: 95%;
+    .comic-panel {
+        width: 80%; /* Make the panel larger on smaller screens */
     }
 }
 
