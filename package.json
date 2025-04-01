@@ -1,0 +1,24 @@
+{
+  "name": "ateamofantsintheirprime.github.io",
+  "version": "1.0.0",
+  "description": "",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ateamofantsintheirprime/ateamofantsintheirprime.github.io.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ateamofantsintheirprime/ateamofantsintheirprime.github.io/issues"
+  },
+  "homepage": "https://github.com/ateamofantsintheirprime/ateamofantsintheirprime.github.io#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  }
+}
