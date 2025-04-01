@@ -21,7 +21,7 @@ function selectRandomPhrases() {
     let usedIndexes = new Set();
 
     phrases.sort((a,b)=>a[1] - b[1])
-    console.log(prases);
+    console.log("Phrases from server:", phrases);
     currentPhrases.push(phrases[0]);
     currentPhrases.push(phrases[1]);
     currentPhrases.push(phrases[2]);
