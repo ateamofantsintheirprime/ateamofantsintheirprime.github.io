@@ -108,22 +108,30 @@
 }
 .container {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     gap: 20px;
-    margin-top: 50px;
-    flex-wrap: wrap;
+    margin-top: 20px;
 }
 
 .box {
     width: 200px;
     height: 150px;
-    background: lightblue;
-    border: 2px solid navy;
+    background-color: #3498db;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    padding: 20px;
     border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background 0.3s;
 }
 
+.box:hover {
+    background-color: #2980b9;
+}
 button {
     margin-top: 10px;
     padding: 10px;
