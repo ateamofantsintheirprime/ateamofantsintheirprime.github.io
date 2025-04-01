@@ -20,13 +20,19 @@ function selectRandomPhrases() {
     currentPhrases = [];
     let usedIndexes = new Set();
 
-    while (currentPhrases.length < 4) {
-        let index = Math.floor(Math.random() * phrases.length);
-        if (!usedIndexes.has(index)) {
-            usedIndexes.add(index);
-            currentPhrases.push(phrases[index]);
-        }
-    }
+    phrases.sort((a,b)=>a[1] - b[1])
+    console.log(prases);
+    currentPhrases.push(phrases[0]);
+    currentPhrases.push(phrases[1]);
+    currentPhrases.push(phrases[2]);
+    currentPhrases.push(phrases[3]);
+    // while (currentPhrases.length < 4) {
+    //     let index = Math.floor(Math.random() * phrases.length);
+    //     if (!usedIndexes.has(index)) {
+    //         usedIndexes.add(index);
+    //         currentPhrases.push(phrases[index]);
+    //     }
+    // }
 
     updateBoxes();
 }
@@ -34,7 +40,7 @@ function selectRandomPhrases() {
 // Update the boxes with new phrases
 function updateBoxes() {
     currentPhrases.forEach((phrase, index) => {
-        document.getElementById(`box${index + 1}`).querySelector("p").textContent = phrase;
+        document.getElementById(`box${index + 1}`).querySelector("p").textContent = phrase[0] + str(phrase[1]);
     });
 }
 

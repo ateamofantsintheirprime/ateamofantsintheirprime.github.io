@@ -1,11 +1,11 @@
 [
-    "The sky is blue.",
-    "Never give up!",
-    "Stay curious.",
-    "Code is poetry.",
-    "Live, laugh, love.",
-    "Knowledge is power.",
-    "Eat, sleep, repeat.",
-    "Dream big."
+    ["The sky is blue.",0],
+    ["Never give up!",0],
+    ["Stay curious.",0],
+    ["Code is poetry.",0],
+    ["Live, laugh, love.",0],
+    ["Knowledge is power.",0],
+    ["Eat, sleep, repeat.",0],
+    ["Dream big.",0]
 ]
 
