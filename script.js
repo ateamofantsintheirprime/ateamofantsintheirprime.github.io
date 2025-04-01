@@ -1,9 +1,9 @@
-const SERVER_URL = "http://localhost:3000"; // Change this if hosting online
+const SERVER_URL = "http://127.0.0.1:8080"; // Use the same port as in server.js
 let phrases = [];
 let currentPhrases = [];
 
 // Load phrases from JSON file
-fetch("/phrases.json")
+fetch(`${SERVER_URL}/phrases.json`)
     .then(response => response.json())
     .then(data => {
         phrases = data;
@@ -40,7 +40,7 @@ function selectRandomPhrases() {
 // Update the boxes with new phrases
 function updateBoxes() {
     currentPhrases.forEach((phrase, index) => {
-        document.getElementById(`box${index + 1}`).querySelector("p").textContent = phrase[0] + str(phrase[1]);
+        document.getElementById(`box${index + 1}`).querySelector("p").textContent = phrase[0] + String(phrase[1]);
     });
 }
 
@@ -48,15 +48,21 @@ function updateBoxes() {
 function boxClicked(boxIndex) {
     let selectedPhrase = currentPhrases[boxIndex];
 
+    // Make only one fetch request - the POST request to record clicks
     fetch(`${SERVER_URL}/record-clicks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phrases: currentPhrases, clickedPhrase: selectedPhrase })
     })
-    .then(response => response.json())
-    .then(() => {
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Server response:", data);
         selectRandomPhrases(); // Pick 4 new phrases after sending data
     })
     .catch(error => console.error("Error sending click data:", error));
 }
-
