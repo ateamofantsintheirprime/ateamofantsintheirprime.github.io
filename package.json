@@ -11,6 +11,9 @@
     "url": "git+https://github.com/ateamofantsintheirprime/ateamofantsintheirprime.github.io.git"
   },
   "keywords": [],
+  "nodemonConfig": {
+    "ignore": ["*.json", "public/javascripts/*.js"]
+  },
   "author": "",
   "license": "ISC",
   "bugs": {
