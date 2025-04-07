@@ -22,7 +22,7 @@ app.use(express.static("."));  // This will serve phrases.json directly
 let clickRecords = require('./phrases.json'); //with path
 let pendingMessages = [];
 let responseBatch = [];
-
+let maxResponseBatchSize = 12;
 for (let currentBatchId = 1; currentBatchId <= lastBatchId; currentBatchId ++) {
         require(`./holly-chat/holly-discord-filtered/remaining_${currentBatchId}.json`);
 
@@ -35,83 +35,75 @@ for (let currentBatchId = 1; currentBatchId <= lastBatchId; currentBatchId ++) {
 // Client sends back reviews. we pick more messages, ones that have not been sent off since the last sort
 //
 // Periodically we go and update the viewcounts and tell python to sort the views
+function views(msg) {
+    return msg['wins'] + msg['losses'];
+}
 
-function searchRemainingManifest(count = 4, minViews = 1) {
-    console.log("searching manifest...");
-    // Find a batch with remaining messages.
+function isPending(message_id) {
+    if (pendingMessages.includes(message_id)) {return true;}
+    for (let i = 0; i < responseBatch.length; i++) {
+        if (responseBatch[i]['messageIds'].includes(message_id)) {return true;}
+    }
+    return false;
+}
+
+function searchManifest(count = 4) {
     let picked_messages = [];
-    let message = "";
-    let raw = "";
-    for (let currentBatchId = 1; currentBatchId <= lastBatchId; currentBatchId ++) {
-        // Open the manifest and see if there are any remaining candidatese
-        let err, data;
-        try {
-            data = fs.readFileSync(`holly-chat/holly-discord-filtered/remaining_${currentBatchId}.json`, "utf8");
-        } catch (err) {
-            console.error("Failed to open batch manifest!");
-            console.error(err);
-            return null;
+    let data, err;
+
+         try {
+             data = fs.readFileSync("holly-chat/holly-discord-filtered/winrates.json", "utf8");
+         } catch (err) {
+             console.error("Failed to open batch manifest!");
+             console.error(err);
+             return null;
+         }
+    data = Object.values(JSON.parse(data));
+    //  this might be omega way too lazy but idgaf
+
+        data.sort((a,b)=>views(a)-views(b))
+    while (picked_messages.length < count) {
+        potential_message = data.shift();
+        if (!isPending(potential_message['message_id'])) {
+            picked_messages.push(potential_message);
+            pendingMessages.push(potential_message['message_id']);
         }
 
-        raw = JSON.parse(data);
-        for (let i=0; i<raw.length; i++){
-            message = raw[i];
-            if (picked_messages.length >= count) {
-                console.log("returning from search", picked_messages);
-                return picked_messages;
-            }
-            if (message['eval_count'] >= minViews) {
-                console.log("eval count higher than minViews", message['eval_count']);
-                break; // Move on to the next file, all the of these messages are viewed enough
-            }
-            if (message['id'] in pendingMessages) {
-                console.log("Message already pending");
-                console.log(pendingMessages);
-            } else {
-                message['batch_id'] = currentBatchId;
-                picked_messages.push(message);
-            }
-        }
     }
-    console.log("All messages have been viewed the minimum number of times!");
-    return null;
+    return picked_messages;
 }
 
-function pickMessages(picks) {
-    // Picks come from manifest entries.
-    if (picks==null) {
-        console.error("Picks is null!");
-        return null;
-    }
-    full_messages = [];// Bad naming. fix
-    var currentBatchId = picks[full_messages.length]['batch_id'];
-    while (full_messages.length < picks.length) {
-        let err, data;
-        try {
-            data = fs.readFileSync(`holly-chat/holly-discord-filtered/batch_${currentBatchId}.json`, "utf8");
-        } catch (err) {
-            console.error(`Error loading batch_${currentBatchId} file.`);
-            console.error(err);
-            return null;
+ function pickMessages(picks) {
+     // Picks come from manifest entries.
+     if (picks==null) {
+         console.error("Picks is null!");
+         return null;
+     }
+     full_messages = [];// Bad naming. fix
+     var currentBatchId = 0;
+     while (picks.length > 0) {
+        pick = picks.pop()
+        if (currentBatchId != pick['batch']) {
+            // If we are not looking at the right batch file, we open the right one.
+            currentBatchId = pick['batch']
+            data = null;
+             try {
+                 data = fs.readFileSync(`holly-chat/holly-discord-filtered/batch_${currentBatchId}.json`, "utf8");
+                 data = JSON.parse(data)
+             } catch (err) {
+                 console.error(`Error loading batch_${currentBatchId} file.`);
+                 console.error(err);
+                 return null;
+             }
         }
+         batchIndex = pick['batch_file_index']
+         message = data[batchIndex]
+         full_messages.push(message)
 
-        raw = JSON.parse(data);
-        while (full_messages.length < picks.length && picks[full_messages.length]['batch_id'] == currentBatchId) {
-            var batchIndex = picks[full_messages.length]['batch_index'];
-            full_messages.push(raw[batchIndex])
-        }
-    }
-    if (full_messages.length < picks.length) {
-        console.error("You should never see this!!! Bad!!");
-        return null;
-    }
-    return full_messages;
-}
+     }
+     return full_messages;
+ }
 
-
-//function process_client_choice(data) {
-
-//}
 
 
 function print_message(message, index=-1) {
@@ -134,21 +126,47 @@ function getMessageFromBatchFile(batchFileData, index = -1) {
     return raw[index];
 }
 
-function pick_messages(count = 1, index = -1) {
-    fs.readFile("holly-chat/holly-discord-filtered/batch_1.json", "utf8", (err, data) => {
-        if (err) {
-            res.status(500).json({ error: "Error loading phrases." });
-        } else {
-            let result = [];
-            let i = 0;
-            if (index > -1) {return getMessageFromBatchFile(data, index);}
-            for (let i = 0; i < count; i++) {
-                result.push(getMessageFromBatchFile(data));
-            }
-            return result;
+
+function save_responses() {
+    // Update the winrate and pull the batch_id from the file
+     let windata, err
+    let batchIds = [];
+         try {
+             windata = fs.readFileSync("holly-chat/holly-discord-filtered/winrates.json", "utf8");
+         } catch (err) {
+             console.error("Failed to open batch manifest!");
+             console.error(err);
+             return null;
+         }
+     windata = JSON.parse(windata);
+
+        while (responseBatch.length > 0) {
+            choices = responseBatch.pop();
+           for (let i = 0; i < choices['messageIds'].length; i++) {
+               var id = choices.messageIds[i];
+               if (!pendingMessages.includes(id)) {
+                console.error("Received a response for a message that wasnt pending!")
+               }
+                pendingMessages.splice(pendingMessages.indexOf(id),1);
+                batchIds[id] = windata[id].batch;
+               if (choices.winner == i) {
+                windata[id].wins += 1;
+               } else {
+                windata[id].losses += 1;
+               }
+               windata[id].winrate = windata[id].wins / (windata[id].wins + windata[id].losses);
+           }
         }
-    });
-    return null;
+        windata = JSON.stringify(windata);
+    //})
+    console.log("saving winrate data to file");
+    fs.writeFileSync("holly-chat/holly-discord-filtered/winrates.json", windata);
+    // FIX THIS LATER
+    // we are gonna switch to using a single
+    // manifest file instead of multiple
+    // remaining files, for now we will just
+    // use the winrates file as the manifest
+
 }
 
 
@@ -175,8 +193,10 @@ app.post("/record-clicks", (req, res) => {
 });
 
 app.post("/messageRequest", (req, res) => {
-    console.log(`Received request for ${req.body['count']} messages`);
-    res.json(pickMessages(searchRemainingManifest(req.body['count'])));
+    var count = req.body['count'];
+    var picks = searchManifest(count)
+    var messages = pickMessages(picks);
+    res.json(messages);
 });
 
 // Serve phrases.json for the client
@@ -194,28 +214,27 @@ app.get("/phrases.json", (req, res) => {
 });
 
 app.post("/sendChoices", (req, res) => {
-    console.log("raw body:", req.body);
     const choices = req.body;
-    //console.log("Choices received:", JSON.stringify(choices));
+    console.log("Choices received:", JSON.stringify(choices, null, 3));
     res.json({message: "Choices recorded"});
+    // put these into the batch of responses, if there are enough responses batched, then we save them.
+    responseBatch.push(...choices);
+    if (responseBatch.length > maxResponseBatchSize) {save_responses();}
 });
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
 
-//var manifest_picks =  searchRemainingManifest(count=4);
-//var msgs = pickMessages(manifest_picks);
-//msgs.forEach((message) => print_message(message))
-
 
 /*  TODO
-    () get the python program to periodically sort the files. make sure to not clash over trying to open the files! on either end
+    (X) get the python program to periodically sort the files. make sure to not clash over trying to open the files! on either end
     (X) send the clients real messages to display
     (X) send the clients a quite a few rounds of messages to display so they dont have to request more for a while
     (X) clients should request more before they need them
-    () Receive client choices and update the remaining files as well as the winrate files
-    () udpate the files in batches
-    () Remove emoji only messages or messages with URLS
+    (X) Receive client choices and update the remaining files as well as the winrate files
+    (X) udpate the files in batches
+    (X) Remove emoji only messages or messages with URLS
+    () Get the website to actually run on the internet
 
 */
