@@ -11,7 +11,7 @@ app.use(cors({
     origin: '*',  // List allowed origins
     crossorigin: "*",
     methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning'],
     credentials: true  // Allow cookies if needed
 }));
 app.use(express.json());
