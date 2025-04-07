@@ -8,9 +8,10 @@ const lastBatchId = 7;
 // In server.js
 const cors = require("cors");
 app.use(cors({
-    origin: ['*','http://127.0.0.1:8080', 'http://localhost:8080'],  // List allowed origins
+    origin: '*',  // List allowed origins
     crossorigin: "*",
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true  // Allow cookies if needed
 }));
 app.use(express.json());
@@ -19,7 +20,6 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files from the current directory
 app.use(express.static("."));  // This will serve phrases.json directly
 
-let clickRecords = require('./phrases.json'); //with path
 let pendingMessages = [];
 let responseBatch = [];
 let maxResponseBatchSize = 12;
@@ -28,13 +28,6 @@ for (let currentBatchId = 1; currentBatchId <= lastBatchId; currentBatchId ++) {
 
 }
 
-// TODO: Make writes to the file happen periodically, test multiple clients spamming inputs, figure out reading the millions of messages quickly
-
-// Open the remaining manifest for each batch. pick some low view messages. send them off to client for review.
-//
-// Client sends back reviews. we pick more messages, ones that have not been sent off since the last sort
-//
-// Periodically we go and update the viewcounts and tell python to sort the views
 function views(msg) {
     return msg['wins'] + msg['losses'];
 }
@@ -228,7 +221,6 @@ app.listen(port, () => {
 
 
 /*  TODO
-    (X) get the python program to periodically sort the files. make sure to not clash over trying to open the files! on either end
     (X) send the clients real messages to display
     (X) send the clients a quite a few rounds of messages to display so they dont have to request more for a while
     (X) clients should request more before they need them
@@ -236,5 +228,9 @@ app.listen(port, () => {
     (X) udpate the files in batches
     (X) Remove emoji only messages or messages with URLS
     () Get the website to actually run on the internet
+    () Neaten everything and fix the naming and get rid of the remaining_x.json files
+    () Display the % of messages that are yet to recieve any kind of rating
+    () eventually put in a real rating system, remember the service should try converge on a top 50 as fast as is possible given the data scale
+    () Add a live leaderboard and maybe a rank reveal after each choice is made
 
 */

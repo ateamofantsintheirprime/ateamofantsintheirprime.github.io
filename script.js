@@ -1,7 +1,7 @@
-const SERVER_URL = "http://127.0.0.1:8080"; // Use the same port as in server.js
-//let phrases = [];
-//let currentPhrases = [];
-//var choices = [];
+//const SERVER_URL = "http://127.0.0.1:8080"; // Use the same port as in server.js
+//const SERVER_URL = "https://polite-coats-create.loca.lt"
+const SERVER_URL = "https://8168-110-175-176-199.ngrok-free.app"
+
 const message_option_num = 4;
 const min_message_buffer = 12;
 const request_batch_size = 12;
