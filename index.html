@@ -1,4 +1,16 @@
 <!DOCTYPE html>
+<script>
+  // Add this to the HEAD section of your HTML
+  // This will add the header to all subsequent fetch requests
+  const originalFetch = window.fetch;
+  window.fetch = function(url, options = {}) {
+    if (!options.headers) {
+      options.headers = {};
+    }
+    options.headers["ngrok-skip-browser-warning"] = "true";
+    return originalFetch(url, options);
+  };
+</script>
 <html lang="en">
 <head>
     <meta charset="UTF-8">

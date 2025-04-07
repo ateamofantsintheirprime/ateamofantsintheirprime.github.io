@@ -1,6 +1,7 @@
 //const SERVER_URL = "http://127.0.0.1:8080"; // Use the same port as in server.js
 //const SERVER_URL = "https://polite-coats-create.loca.lt"
-const SERVER_URL = "https://8168-110-175-176-199.ngrok-free.app"
+//const SERVER_URL = "https://8168-110-175-176-199.ngrok-free.app"
+const SERVER_URL = "https://illegally-peaceful-sailfish.ngrok-free.app" // This one should be the free static url
 
 const message_option_num = 4;
 const min_message_buffer = 12;
@@ -49,7 +50,11 @@ function sendChoices() {
      console.log("Sending choices:",choices);
      fetch(`${SERVER_URL}/sendChoices`, {
          method: "POST",
-         headers: { "Content-Type": "application/json"},
+          headers: {
+             "Content-Type": "application/json",
+             "ngrok-skip-browser-warning": "true"  // Add this header
+         },
+
          body: JSON.stringify(choices)
      })
      .then(response => {
@@ -69,7 +74,10 @@ async function requestMessages(count=request_batch_size) {
     try {
         let response = await fetch(`${SERVER_URL}/messageRequest`, {
             method: "POST",
-            headers: { "Content-Type": "application/json"},
+            headers: {
+                "Content-Type": "application/json",
+                "ngrok-skip-browser-warning": "true"  // Add this header
+            },
             body: JSON.stringify({"count":count})
         });
 
